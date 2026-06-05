@@ -1,0 +1,34 @@
+# Line endings: keep the repo deterministic across both agents' platforms.
+# Claude works on Windows, Codex on Linux — normalize all text to LF in the repo
+# and check out LF everywhere, so neither side ever churns EOLs.
+* text=auto eol=lf
+
+# Explicit text files (so they're always normalized regardless of content sniffing)
+*.ts    text eol=lf
+*.tsx   text eol=lf
+*.js    text eol=lf
+*.mjs   text eol=lf
+*.cjs   text eol=lf
+*.json  text eol=lf
+*.css   text eol=lf
+*.md    text eol=lf
+*.sql   text eol=lf
+*.prisma text eol=lf
+*.toml  text eol=lf
+*.yml   text eol=lf
+*.yaml  text eol=lf
+*.env   text eol=lf
+
+# Binary / packaging artifacts — never touch their bytes
+*.bundle    binary
+*.tar.gz    binary
+*.tgz       binary
+*.db        binary
+*.png       binary
+*.jpg       binary
+*.jpeg      binary
+*.gif       binary
+*.ico       binary
+*.webp      binary
+*.woff      binary
+*.woff2     binary

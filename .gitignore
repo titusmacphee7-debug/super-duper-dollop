@@ -44,3 +44,8 @@ CLAUDE.local.md
 
 # playwright browser binaries
 /.cache
+
+# packaging artifacts (not part of the app)
+workshop-buddy.bundle
+workshop-buddy-repo.tar.gz
+PUSH_TO_GITHUB.md
