@@ -1,0 +1,170 @@
+// Workshop Buddy — schema-first across ALL domains.
+// Only the wishlist + pricing path gets services/APIs this phase; every other
+// model exists now so the cross-domain joins are first-class from day one.
+// Prefer ADDITIVE migrations later — these core tables are referenced everywhere.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------- Core / shared ----------
+model User {
+  id        String            @id @default(cuid())
+  email     String            @unique
+  name      String?
+  projects  Project[]
+  wishlists Wishlist[]
+  locations Location[]
+  expenses  Expense[]
+  inventory InventoryRecord[]
+}
+
+// The canonical "thing" — a specific product, tool, or material.
+// Populated by the pricing engine; referenced by every other domain. The backbone.
+model Item {
+  id           String            @id @default(cuid())
+  name         String
+  brand        String?
+  modelNumber  String?
+  upc          String?
+  category     String? // 'tool' | 'material' | 'consumable' | 'other'
+  imageUrl     String?
+  sourceUrl    String?
+  createdAt    DateTime          @default(now())
+  listings     RetailerListing[]
+  inventory    InventoryRecord[]
+  requirements Requirement[]
+  wishlistIn   WishlistEntry[]
+  expenses     Expense[]
+
+  @@index([modelNumber])
+  @@index([upc])
+}
+
+// ---------- Pricing / Wishlist (Feature 1 — IMPLEMENTED) ----------
+model RetailerListing {
+  id            String   @id @default(cuid())
+  itemId        String
+  item          Item     @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  retailer      String
+  url           String
+  price         Float
+  originalPrice Float?
+  currency      String   @default("USD")
+  inStock       Boolean  @default(true)
+  shipping      String?
+  condition     String? // 'new' | 'renewed' | 'used' | 'open-box'
+  priceHistory  Float[]  @default([])
+  matchScore    Float? // confidence this listing == the item
+  updatedAt     DateTime @updatedAt
+
+  @@index([itemId])
+}
+
+model Wishlist {
+  id        String          @id @default(cuid())
+  name      String
+  userId    String
+  user      User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  entries   WishlistEntry[]
+  createdAt DateTime        @default(now())
+}
+
+model WishlistEntry {
+  id                  String   @id @default(cuid())
+  wishlistId          String
+  wishlist            Wishlist @relation(fields: [wishlistId], references: [id], onDelete: Cascade)
+  itemId              String
+  item                Item     @relation(fields: [itemId], references: [id])
+  preferredRetailerId String? // RetailerListing.id
+  priceAtSave         Float? // powers the price-change badge later
+  note                String?
+  acquired            Boolean  @default(false) // flipped when purchased
+  requirementId       String? // links a gap to its acquisition (future)
+  addedAt             DateTime @default(now())
+}
+
+// ---------- Storage / Inventory (SCAFFOLDED) ----------
+model Location {
+  id       String            @id @default(cuid())
+  userId   String
+  user     User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name     String
+  parentId String? // nesting: garage > shelf B > bin 3
+  parent   Location?         @relation("LocationTree", fields: [parentId], references: [id])
+  children Location[]        @relation("LocationTree")
+  records  InventoryRecord[]
+}
+
+model InventoryRecord {
+  id         String    @id @default(cuid())
+  userId     String
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  itemId     String
+  item       Item      @relation(fields: [itemId], references: [id])
+  locationId String?
+  location   Location? @relation(fields: [locationId], references: [id])
+  quantity   Float     @default(1)
+  condition  String?
+  notes      String?
+
+  @@index([itemId])
+}
+
+// ---------- Projects / Tasks / Requirements (SCAFFOLDED) ----------
+model Project {
+  id           String        @id @default(cuid())
+  userId       String
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name         String
+  status       String        @default("planning") // planning|active|blocked|done
+  budget       Float?
+  startDate    DateTime?
+  dueDate      DateTime?
+  tasks        Task[]
+  requirements Requirement[]
+  expenses     Expense[]
+  createdAt    DateTime      @default(now())
+}
+
+model Task {
+  id        String   @id @default(cuid())
+  projectId String
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  title     String
+  status    String   @default("todo") // todo|doing|done
+  priority  Int      @default(0)
+  createdAt DateTime @default(now())
+}
+
+// What a project needs — the basis for gap analysis + cost-to-complete.
+model Requirement {
+  id        String  @id @default(cuid())
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  itemId    String
+  item      Item    @relation(fields: [itemId], references: [id])
+  quantity  Float   @default(1)
+  // gap = quantity − owned(itemId); cost-to-complete = gap × cheapest in-stock listing
+}
+
+// ---------- Expenses (SCAFFOLDED) ----------
+model Expense {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  itemId    String?
+  item      Item?    @relation(fields: [itemId], references: [id])
+  projectId String?
+  project   Project? @relation(fields: [projectId], references: [id])
+  amount    Float
+  currency  String   @default("USD")
+  retailer  String?
+  note      String?
+  spentAt   DateTime @default(now())
+}
