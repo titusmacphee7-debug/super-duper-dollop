@@ -2,6 +2,7 @@ import type { NextAuthOptions } from "next-auth";
 import { getServerSession } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { prisma } from "@/lib/core/db";
+import { UnauthorizedError } from "@/lib/core/errors";
 
 /**
  * Single-user now, multi-user-ready. A Credentials provider checks one env-defined
@@ -60,8 +61,6 @@ export async function getCurrentUser() {
     create: { email: email.toLowerCase(), name: "Maker" },
   });
 }
-
-import { UnauthorizedError } from "@/lib/core/errors";
 
 /** Like getCurrentUser, but throws 401 when no user can be resolved. */
 export async function requireUser() {
