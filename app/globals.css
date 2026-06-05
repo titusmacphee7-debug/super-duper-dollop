@@ -1,0 +1,49 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * Workshop Buddy design tokens — the contract for all UI.
+ * Brand: DeWalt-style yellow accent on a warm, Claude-like cream canvas with charcoal ink.
+ * Yellow is an ACCENT only (CTAs, active nav, key highlights, focus rings) — never a
+ * page background, never a large fill, and NEVER white/light text on yellow.
+ */
+:root {
+  /* Brand — yellow is an ACCENT, never a page background */
+  --wb-yellow: #febd17; /* CTAs, active nav, key highlights, brand mark, focus rings */
+  --wb-yellow-hover: #e9a904;
+  --wb-yellow-ink: #2a2206; /* dark text that goes ON yellow */
+
+  /* Surfaces — warm cream, in the Claude family */
+  --wb-bg: #f4f1e9; /* page canvas */
+  --wb-surface: #fcfbf7; /* cards */
+  --wb-surface-2: #efebe0; /* sunken / secondary */
+
+  /* Ink */
+  --wb-ink: #1c1a16; /* primary text */
+  --wb-muted: #6b665c; /* secondary text */
+  --wb-faint: #9a9488; /* hints */
+  --wb-border: #e5dfd2;
+
+  /* Semantic */
+  --wb-success: #1b6b4a;
+  --wb-success-bg: #e8f0e9; /* price drops, in-stock */
+  --wb-danger: #b23b2e;
+  --wb-danger-bg: #f6e8e5; /* price rises, errors */
+}
+
+@layer base {
+  body {
+    background-color: var(--wb-bg);
+    color: var(--wb-ink);
+    -webkit-font-smoothing: antialiased;
+  }
+  a {
+    color: inherit;
+  }
+  /* Yellow accent focus ring for keyboard users. */
+  :focus-visible {
+    outline: 2px solid var(--wb-yellow);
+    outline-offset: 2px;
+  }
+}
