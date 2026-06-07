@@ -88,7 +88,8 @@ or direct DB access in `app/api/**` beyond calling services + `requireUser()`.
 ### Wishlist + items API (stable — build against these)
 
 ```
-POST   /api/wishlist/scrape          { url } -> { item, listings, missingFields }
+POST   /api/wishlist/scrape          { url }   -> { item, listings, missingFields }
+POST   /api/wishlist/search          { query } -> { item, listings, errors }   (name/keyword search)
 GET    /api/wishlist                 -> { wishlists: WishlistWithEntries[] }
 POST   /api/wishlist                 { name } -> Wishlist                         (201)
 POST   /api/wishlist/[id]/entries    { itemId, preferredRetailerId?, priceAtSave?, note? } -> WishlistEntry (201)

@@ -1,7 +1,7 @@
 import type { RetailerListing } from "@prisma/client";
 import { prisma } from "@/lib/core/db";
 import { emit } from "@/lib/core/events";
-import { NotFoundError } from "@/lib/core/errors";
+import { BadRequestError, NotFoundError } from "@/lib/core/errors";
 import { getItem, productToItemInput, upsertItem } from "@/lib/modules/catalog";
 import { scrapeProduct, searchAllRetailers, type SearchQuery } from "@/lib/modules/pricing";
 import type {
@@ -155,6 +155,18 @@ export async function getItemWithListings(itemId: string): Promise<ItemWithListi
     orderBy: { price: "asc" },
   });
   return { item, listings, errors: [] };
+}
+
+/**
+ * Name / keyword search: spin up a lightweight catalog Item from a typed query, then run the
+ * cross-retailer pricing search against it. Same return shape as refreshItem so the compare
+ * UI handles URL-scrape and name-search results identically.
+ */
+export async function searchByName(query: string): Promise<ItemWithListings> {
+  const name = query.trim();
+  if (!name) throw new BadRequestError("a search term is required");
+  const item = await upsertItem({ name, category: "other" });
+  return refreshItem(item.id);
 }
 
 // ---------- Wishlist CRUD ----------
