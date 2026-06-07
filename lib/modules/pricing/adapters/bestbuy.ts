@@ -27,24 +27,28 @@ export const bestBuyAdapter: RetailerAdapter = {
       const out: Candidate[] = [];
       $("li.sku-item").each((_i, el) => {
         if (out.length >= 10) return;
-        const card = $(el);
-        const link = card.find("h4.sku-title a, .sku-title a").first();
-        const title = link.text().trim();
-        const href = link.attr("href");
-        const priceStr = card.find(".priceView-customer-price span").first().text().trim();
-        if (!title || !href) return;
-        const money = priceStr ? parseMoney(priceStr) : null;
-        out.push({
-          retailer: RETAILER,
-          title,
-          modelNumber: card.find(".sku-model .sku-value").first().text().trim() || null,
-          price: money?.amount ?? null,
-          currency: money?.currency ?? null,
-          url: new URL(href, "https://www.bestbuy.com").toString(),
-          imageUrl: card.find("img.product-image").attr("src") ?? null,
-          inStock: true,
-          condition: "new",
-        });
+        try {
+          const card = $(el);
+          const link = card.find("h4.sku-title a, .sku-title a").first();
+          const title = link.text().trim();
+          const href = link.attr("href");
+          const priceStr = card.find(".priceView-customer-price span").first().text().trim();
+          if (!title || !href) return;
+          const money = priceStr ? parseMoney(priceStr) : null;
+          out.push({
+            retailer: RETAILER,
+            title,
+            modelNumber: card.find(".sku-model .sku-value").first().text().trim() || null,
+            price: money?.amount ?? null,
+            currency: money?.currency ?? null,
+            url: new URL(href, "https://www.bestbuy.com").toString(),
+            imageUrl: card.find("img.product-image").attr("src") ?? null,
+            inStock: true,
+            condition: "new",
+          });
+        } catch {
+          // Skip one malformed card (e.g. a bad href) rather than dropping every candidate.
+        }
       });
       return out;
     } catch {

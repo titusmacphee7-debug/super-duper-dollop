@@ -53,7 +53,11 @@ export const authOptions: NextAuthOptions = {
  */
 export async function getCurrentUser() {
   const session = await getServerSession(authOptions);
-  const email = session?.user?.email ?? process.env.DEV_USER_EMAIL;
+  // Dev convenience only: never honor the unauthenticated fallback in production, or a stray
+  // DEV_USER_EMAIL would let every anonymous request act as that user (auth bypass).
+  const devFallback =
+    process.env.NODE_ENV === "production" ? undefined : process.env.DEV_USER_EMAIL;
+  const email = session?.user?.email ?? devFallback;
   if (!email) return null;
   return prisma.user.upsert({
     where: { email: email.toLowerCase() },

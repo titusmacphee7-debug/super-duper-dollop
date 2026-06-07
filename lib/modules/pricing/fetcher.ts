@@ -78,6 +78,7 @@ export function getFetcher(): Fetcher {
 const CAPTCHA_MARKERS = [/captcha/i, /are you a human/i, /unusual traffic/i, /robot check/i];
 
 export function looksBlocked(result: FetchResult): boolean {
-  if (result.status === 403 || result.status === 429) return true;
+  // Anti-bot (403/429) and any 5xx/proxy error page must not be trusted or cached as a product.
+  if (result.status === 403 || result.status === 429 || result.status >= 500) return true;
   return CAPTCHA_MARKERS.some((re) => re.test(result.html.slice(0, 4000)));
 }

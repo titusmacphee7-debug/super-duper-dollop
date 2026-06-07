@@ -27,22 +27,26 @@ export const walmartAdapter: RetailerAdapter = {
       const out: Candidate[] = [];
       $("div[data-item-id]").each((_i, el) => {
         if (out.length >= 10) return;
-        const card = $(el);
-        const title = card.find("span[data-automation-id='product-title']").first().text().trim();
-        const href = card.find("a[link-identifier]").attr("href") ?? card.find("a").attr("href");
-        const priceStr = card.find("div[data-automation-id='product-price']").first().text().trim();
-        if (!title || !href) return;
-        const money = priceStr ? parseMoney(priceStr) : null;
-        out.push({
-          retailer: RETAILER,
-          title,
-          price: money?.amount ?? null,
-          currency: money?.currency ?? null,
-          url: new URL(href, "https://www.walmart.com").toString(),
-          imageUrl: card.find("img").attr("src") ?? null,
-          inStock: true,
-          condition: "new",
-        });
+        try {
+          const card = $(el);
+          const title = card.find("span[data-automation-id='product-title']").first().text().trim();
+          const href = card.find("a[link-identifier]").attr("href") ?? card.find("a").attr("href");
+          const priceStr = card.find("div[data-automation-id='product-price']").first().text().trim();
+          if (!title || !href) return;
+          const money = priceStr ? parseMoney(priceStr) : null;
+          out.push({
+            retailer: RETAILER,
+            title,
+            price: money?.amount ?? null,
+            currency: money?.currency ?? null,
+            url: new URL(href, "https://www.walmart.com").toString(),
+            imageUrl: card.find("img").attr("src") ?? null,
+            inStock: true,
+            condition: "new",
+          });
+        } catch {
+          // Skip one malformed card (e.g. a bad href) rather than dropping every candidate.
+        }
       });
       return out;
     } catch {

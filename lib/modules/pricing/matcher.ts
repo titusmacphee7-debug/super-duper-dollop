@@ -22,7 +22,7 @@ export function scoreCandidate(q: SearchQuery, c: Candidate): number {
     `${q.brand ?? ""} ${q.name}`.toLowerCase().trim(),
     `${c.brand ?? ""} ${c.title}`.toLowerCase().trim(),
   );
-  if (q.sourcePrice && c.price) {
+  if (q.sourcePrice != null && q.sourcePrice > 0 && c.price != null && c.price > 0) {
     const ratio = c.price / q.sourcePrice;
     if (ratio < 0.33 || ratio > 3) score *= 0.5;
   }

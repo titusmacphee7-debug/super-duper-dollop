@@ -2,6 +2,7 @@ import { cacheGetJson, cacheSetJson, hashKey, CACHE_TTL } from "@/lib/core/redis
 import { getFetcher, looksBlocked } from "./fetcher";
 import { adapterForUrl } from "./adapters";
 import { extractProduct } from "./extract";
+import { assertPublicHttpUrl } from "./ssrf";
 import type { Product } from "./types";
 
 /**
@@ -9,13 +10,16 @@ import type { Product } from "./types";
  * Cached by URL hash for 1h. Returns partial data rather than throwing.
  */
 export async function scrapeProduct(url: string): Promise<Product> {
+  await assertPublicHttpUrl(url); // SSRF guard: reject loopback/link-local/private targets
   const key = hashKey("scrape", url);
   const cached = await cacheGetJson<Product>(key);
   if (cached) return cached;
 
   const product = await doScrape(url);
   // Only cache useful results — never poison the cache with a blocked/empty page.
-  if (product.name) await cacheSetJson(key, product, CACHE_TTL.scrape);
+  if (product.name && !product._missingFields.includes("blocked")) {
+    await cacheSetJson(key, product, CACHE_TTL.scrape);
+  }
   return product;
 }
 

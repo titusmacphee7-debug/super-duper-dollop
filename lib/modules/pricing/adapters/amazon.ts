@@ -28,22 +28,26 @@ export const amazonAdapter: RetailerAdapter = {
       const out: Candidate[] = [];
       $("div[data-component-type='s-search-result']").each((_i, el) => {
         if (out.length >= 10) return;
-        const card = $(el);
-        const title = card.find("h2 a span").first().text().trim();
-        const href = card.find("h2 a").attr("href");
-        const priceStr = card.find(".a-price .a-offscreen").first().text().trim();
-        if (!title || !href) return;
-        const money = priceStr ? parseMoney(priceStr) : null;
-        out.push({
-          retailer: RETAILER,
-          title,
-          price: money?.amount ?? null,
-          currency: money?.currency ?? null,
-          url: new URL(href, "https://www.amazon.com").toString(),
-          imageUrl: card.find("img.s-image").attr("src") ?? null,
-          inStock: true,
-          condition: "new",
-        });
+        try {
+          const card = $(el);
+          const title = card.find("h2 a span").first().text().trim();
+          const href = card.find("h2 a").attr("href");
+          const priceStr = card.find(".a-price .a-offscreen").first().text().trim();
+          if (!title || !href) return;
+          const money = priceStr ? parseMoney(priceStr) : null;
+          out.push({
+            retailer: RETAILER,
+            title,
+            price: money?.amount ?? null,
+            currency: money?.currency ?? null,
+            url: new URL(href, "https://www.amazon.com").toString(),
+            imageUrl: card.find("img.s-image").attr("src") ?? null,
+            inStock: true,
+            condition: "new",
+          });
+        } catch {
+          // Skip one malformed card (e.g. a bad href) rather than dropping every candidate.
+        }
       });
       return out;
     } catch {

@@ -63,6 +63,7 @@ model RetailerListing {
   matchScore    Float? // confidence this listing == the item
   updatedAt     DateTime @updatedAt
 
+  @@unique([itemId, retailer]) // one listing per (item, retailer); enables atomic upsert, no dup rows
   @@index([itemId])
 }
 

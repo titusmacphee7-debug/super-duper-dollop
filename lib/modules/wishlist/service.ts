@@ -2,7 +2,7 @@ import type { RetailerListing } from "@prisma/client";
 import { prisma } from "@/lib/core/db";
 import { emit } from "@/lib/core/events";
 import { NotFoundError } from "@/lib/core/errors";
-import { productToItemInput, upsertItem } from "@/lib/modules/catalog";
+import { getItem, productToItemInput, upsertItem } from "@/lib/modules/catalog";
 import { scrapeProduct, searchAllRetailers, type SearchQuery } from "@/lib/modules/pricing";
 import type {
   AddEntryInput,
@@ -33,40 +33,20 @@ interface ListingData {
 
 /** Upsert a listing per (item, retailer); append the old price to priceHistory on change. */
 async function saveListing(itemId: string, data: ListingData): Promise<RetailerListing> {
-  const existing = await prisma.retailerListing.findFirst({
-    where: { itemId, retailer: data.retailer },
+  const existing = await prisma.retailerListing.findUnique({
+    where: { itemId_retailer: { itemId, retailer: data.retailer } },
   });
+  const priceChanged = !!existing && existing.price !== data.price;
+  const priceHistory = existing
+    ? priceChanged
+      ? [...existing.priceHistory, existing.price]
+      : existing.priceHistory
+    : [];
 
-  if (existing) {
-    const priceChanged = existing.price !== data.price;
-    const priceHistory = priceChanged ? [...existing.priceHistory, existing.price] : existing.priceHistory;
-    const updated = await prisma.retailerListing.update({
-      where: { id: existing.id },
-      data: {
-        url: data.url,
-        price: data.price,
-        originalPrice: data.originalPrice ?? null,
-        currency: data.currency,
-        inStock: data.inStock,
-        shipping: data.shipping ?? null,
-        condition: data.condition ?? null,
-        matchScore: data.matchScore ?? null,
-        priceHistory,
-      },
-    });
-    if (priceChanged) {
-      emit("listing.priceChanged", {
-        listingId: updated.id,
-        itemId,
-        from: existing.price,
-        to: data.price,
-      });
-    }
-    return updated;
-  }
-
-  return prisma.retailerListing.create({
-    data: {
+  // Upsert on the (itemId, retailer) unique key so concurrent saves can't create duplicate rows.
+  const listing = await prisma.retailerListing.upsert({
+    where: { itemId_retailer: { itemId, retailer: data.retailer } },
+    create: {
       itemId,
       retailer: data.retailer,
       url: data.url,
@@ -78,7 +58,23 @@ async function saveListing(itemId: string, data: ListingData): Promise<RetailerL
       condition: data.condition ?? null,
       matchScore: data.matchScore ?? null,
     },
+    update: {
+      url: data.url,
+      price: data.price,
+      originalPrice: data.originalPrice ?? null,
+      currency: data.currency,
+      inStock: data.inStock,
+      shipping: data.shipping ?? null,
+      condition: data.condition ?? null,
+      matchScore: data.matchScore ?? null,
+      priceHistory,
+    },
   });
+
+  if (priceChanged && existing) {
+    emit("listing.priceChanged", { listingId: listing.id, itemId, from: existing.price, to: data.price });
+  }
+  return listing;
 }
 
 /**
@@ -90,7 +86,7 @@ export async function scrapeToItem(url: string): Promise<ScrapeResult> {
   const product = await scrapeProduct(url);
   const item = await upsertItem(productToItemInput(product));
 
-  if (product.price != null) {
+  if (product.price != null && product.price > 0) {
     await saveListing(item.id, {
       retailer: product.retailer ?? hostOf(url),
       url,
@@ -106,7 +102,7 @@ export async function scrapeToItem(url: string): Promise<ScrapeResult> {
     where: { itemId: item.id },
     orderBy: { price: "asc" },
   });
-  return { item, product, listings, missingFields: product._missingFields };
+  return { item, product, listings, missingFields: product._missingFields ?? [] };
 }
 
 /**
@@ -186,6 +182,8 @@ async function assertOwnedWishlist(userId: string, wishlistId: string): Promise<
 
 export async function addEntry(userId: string, wishlistId: string, input: AddEntryInput) {
   await assertOwnedWishlist(userId, wishlistId);
+  // Validate the item up front so a bad itemId is a clean 404, not a leaked Prisma FK 500.
+  if (!(await getItem(input.itemId))) throw new NotFoundError("item not found");
   return prisma.wishlistEntry.create({
     data: {
       wishlistId,
@@ -200,5 +198,6 @@ export async function addEntry(userId: string, wishlistId: string, input: AddEnt
 
 export async function removeEntry(userId: string, wishlistId: string, entryId: string): Promise<void> {
   await assertOwnedWishlist(userId, wishlistId);
-  await prisma.wishlistEntry.deleteMany({ where: { id: entryId, wishlistId } });
+  const { count } = await prisma.wishlistEntry.deleteMany({ where: { id: entryId, wishlistId } });
+  if (count === 0) throw new NotFoundError("wishlist entry not found");
 }

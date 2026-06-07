@@ -48,13 +48,25 @@ export function parseMoney(input: string | number, fallbackCurrency = "USD"): Mo
   let numeric = input.replace(/[^0-9.,]/g, "");
   if (!numeric) return null;
 
-  const lastComma = numeric.lastIndexOf(",");
-  const lastDot = numeric.lastIndexOf(".");
-  // Whichever separator is rightmost is the decimal separator.
-  if (lastComma > lastDot) {
-    numeric = numeric.replace(/\./g, "").replace(",", ".");
-  } else {
-    numeric = numeric.replace(/,/g, "");
+  const hasComma = numeric.includes(",");
+  const hasDot = numeric.includes(".");
+  if (hasComma && hasDot) {
+    // Both present: the rightmost separator is the decimal point; the other groups thousands.
+    if (numeric.lastIndexOf(",") > numeric.lastIndexOf(".")) {
+      numeric = numeric.replace(/\./g, "").replace(",", ".");
+    } else {
+      numeric = numeric.replace(/,/g, "");
+    }
+  } else if (hasComma || hasDot) {
+    // One kind of separator. Repeated separators ("1,234,567"), or a single separator with a
+    // leading group and exactly 3 trailing digits ("1,299" / "1.299"), is a THOUSANDS separator;
+    // otherwise it's a decimal point ("12,99", "1.50", ".99"). This stops "$1,299" -> $1.30.
+    const sep = hasComma ? "," : ".";
+    const parts = numeric.split(sep);
+    const last = parts[parts.length - 1];
+    const grouping =
+      parts.length > 2 || (parts.length === 2 && parts[0].length >= 1 && last.length === 3);
+    numeric = grouping ? parts.join("") : numeric.replace(sep, ".");
   }
 
   const amount = Number.parseFloat(numeric);

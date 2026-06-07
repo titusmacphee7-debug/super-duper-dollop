@@ -64,10 +64,11 @@ export async function searchAllRetailers(q: SearchQuery): Promise<SearchOutcome>
     const best = settledResult.value.candidates
       .slice(0, 10)
       .map((c) => ({ ...c, score: scoreCandidate(q, c) }))
-      .filter((c) => c.score >= MATCH_THRESHOLD && c.price != null)
+      // A non-positive price is a parse error / placeholder, never a real "cheapest" offer.
+      .filter((c) => c.score >= MATCH_THRESHOLD && c.price != null && c.price > 0)
       .sort((a, b) => b.score - a.score)[0];
 
-    if (best && best.price != null) {
+    if (best && best.price != null && best.price > 0) {
       results.push({
         retailer,
         url: best.url,
