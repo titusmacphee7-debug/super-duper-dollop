@@ -18,6 +18,31 @@ no turn-taking; this is continuity, not a handoff.
 
 ---
 
+### 2026-06-07 — Split into Compare + Wishlist pages; Feature 1 code-complete
+- **Did:** Fixed the IA — the one screen was the *searcher* but was labelled "Wishlist". Split into
+  **`/compare`** (paste a URL **or** type a product name → two-phase compare + results) and
+  **`/wishlist`** (the saved / price-tracked items as a full page). `/` redirects to `/compare`.
+  Added a **name/keyword search** backend (`POST /api/wishlist/search`) so the searcher takes a URL
+  or a name. Route-based sidebar nav, shared `AppFrame`. Cleaned up: dropped the combined
+  `CompareScreen` + dead two-column/rail CSS, extracted `SavedEntryCard`. Linear: **WOR-129** (Done).
+- **Files touched:** `app/page.tsx` (redirect), `app/compare/page.tsx`, `app/wishlist/page.tsx` (new),
+  `components/wishlist/{AppFrame,CompareView,WishlistView}.tsx` (new) + `cards.tsx` (nav/SavedEntryCard),
+  removed `CompareScreen.tsx`, `app/globals.css`, `lib/modules/wishlist/{service,index}.ts`,
+  `app/api/wishlist/search/route.ts` (new), `CONVENTIONS.md` §4/§7, `AGENTS.md`.
+- **Verified:** `pnpm typecheck` + `build` + `test` (19) green; both routes DOM-verified on the dev
+  server (active nav, headers, empty states, the URL/name input).
+- **Contract changes:** new `POST /api/wishlist/search { query } -> { item, listings, errors }`; new
+  routes `/compare` + `/wishlist` (`/` redirects). Schema, other service interfaces, and tokens unchanged.
+- **Open / risky:** **Feature 1 is code-complete but not yet *runnable* — it needs a live Postgres +
+  Redis.** Every action (scrape, search, save, list) hits the DB; with none reachable the UI shows
+  graceful empty/error states. This is the ONLY thing between here and "usable." Smaller: un-save
+  (delete) is still visual-only; name-search creates a fresh catalog Item per query (minor dedupe gap).
+- **Next task:** provision Postgres + Redis (`docker compose up -d`, or Neon + Upstash) and run
+  `pnpm prisma migrate deploy` — then compare + save + wishlist work end-to-end. After that: wire
+  un-save (`removeEntry`), responsive breakpoints, real product imagery.
+
+---
+
 ### 2026-06-07 — Shop Wishlist UI (Graphite Pro) built + wired
 - **Did:** Implemented the Claude-design **"Graphite Pro"** Shop Wishlist screen inside the app
   (the design handoff `Workshop buddy.zip`) and wired it to the real contract — no sample data
