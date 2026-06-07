@@ -1,8 +1,6 @@
 # CONVENTIONS.md — Workshop Buddy
 
-The contract. Claude (architect/backend) keeps this authoritative; Codex (frontend) builds
-against it. If something here is missing or wrong, don't work around it — log it under
-"Requests for Claude" in `HANDOFF.md`.
+The contract. Keep this authoritative and current — it's what every session builds against. If something here is missing or wrong, don't work around it — fix it at the source and note the change in `HANDOFF.md` (the work log).
 
 ---
 
@@ -22,7 +20,7 @@ service interfaces — **never** a direct Prisma read into another module's tabl
 ```
 app/
   api/**                      route handlers (thin: parse -> call service -> respond)
-  (pages)                     Codex's lane — UI lives here
+  (pages)                     the app's UI lives here (pages + components)
   layout.tsx, page.tsx, globals.css
 lib/
   core/                       cross-cutting infra (no domain logic)
@@ -142,8 +140,8 @@ Tokens are defined once in `app/globals.css` (`:root`) and surfaced as Tailwind 
 | `--wb-yellow`           | `bg/text/ring-wb-yellow`  | ACCENT only: CTAs, active nav, key highlights, focus rings |
 | `--wb-yellow-hover`     | `bg-wb-yellow-hover`      | hover state of yellow CTAs |
 | `--wb-yellow-ink`       | `text-wb-yellow-ink`      | the ONLY text color allowed on yellow |
-| `--wb-bg`               | `bg-wb-bg`                | page canvas (warm cream) |
-| `--wb-surface` / `-2`   | `bg-wb-surface` / `-2`    | cards / sunken surfaces |
+| `--wb-bg`               | `bg-wb-bg`                | page canvas (warm near-black) |
+| `--wb-surface` / `-2`   | `bg-wb-surface` / `-2`    | cards / raised surfaces (elevation rises lighter) |
 | `--wb-ink` / `-muted` / `-faint` | `text-wb-ink` / `-muted` / `-faint` | primary / secondary / hint text |
 | `--wb-border`           | `border-wb-border`        | borders |
 | `--wb-success` / `-bg`  | `text/bg-wb-success`      | price drops, in-stock |
@@ -159,7 +157,7 @@ fill, never a page background, and **never white/light text on yellow** — alwa
 - **pnpm only.** Never npm/yarn.
 - **No default exports** in shared modules (`lib/**`). Named exports only.
 - Money goes through `lib/core/money`.
-- Only Claude edits the contract (schema, `lib/modules/*/index.ts`, API signatures, design tokens),
+- Evolve the contract deliberately (schema, `lib/modules/*/index.ts`, API signatures, design tokens),
   and every change gets a `HANDOFF.md` entry.
 - Migrations are Claude-only and **additive** — the core tables are referenced everywhere.
 
@@ -181,5 +179,5 @@ fill, never a page background, and **never white/light text on yellow** — alwa
 6. **Caching** — read-through with `withCache(key, ttl, fn)`; key via `hashKey()`; pick a TTL
    (extend `CACHE_TTL` if it's a new category).
 7. **Tests** — unit-test the pure logic (matchers, parsers, derivations) in `test/`.
-8. **Green + handoff** — `pnpm typecheck && pnpm build && pnpm test`, then update this file if you
-   changed a pattern, write a `HANDOFF.md` entry, and flip `TURN:`.
+8. **Green + log** — `pnpm typecheck && pnpm build && pnpm test`, then update this file if you
+   changed a pattern, write a `HANDOFF.md` entry, and you're done.

@@ -5,8 +5,9 @@ Next.js 14 app. **Feature 1 (Shop Wishlist)** ships now: paste a product URL, sc
 canonical `Item`, and compare live prices across retailers. The schema anticipates projects,
 inventory, tools, gaps, expenses, and cost-to-complete.
 
-> Two-agent build: **Claude** owns the backend/contract (schema, services, APIs, design tokens);
-> **Codex** builds feature UIs against the contract. See `AGENTS.md`, `CLAUDE.md`, `CONVENTIONS.md`.
+> Solo build with Claude Code: one developer owns the whole stack — schema, services, APIs,
+> UI, and design tokens. Architecture and conventions live in `AGENTS.md`, `CLAUDE.md`,
+> `CONVENTIONS.md`.
 
 ## Stack
 Next.js 14 (App Router) · TypeScript · Prisma + PostgreSQL · Redis (Upstash/ioredis) · BullMQ ·

@@ -3,14 +3,12 @@
 
 ## Your Role
 
-You are the **architect and backend engineer** for Workshop Buddy, a personal workshop-management
+You are the **architect and engineer** for Workshop Buddy, a personal workshop-management
 web app. You own the decisions that are expensive to change later: the data model, the module
 architecture, the core backend services, and the project framework.
 
-A second agent — **OpenAI Codex** — will build the feature UIs and high-volume frontend code on
-top of the foundation you lay down. A large part of your job is therefore leaving clean,
-documented extension points and writing a `CONVENTIONS.md` that Codex (and future sessions) will
-treat as law.
+You build the feature UIs yourself, too. A large part of the job is leaving clean, documented
+extension points and keeping a `CONVENTIONS.md` that future sessions will treat as law.
 
 **Optimize for extensibility over completeness.** Only the first feature (Shop Wishlist) ships
 now, but the schema and module boundaries must anticipate the full scope below, so that adding a
@@ -68,7 +66,7 @@ is wired up now.
   Stub the listeners you don't need yet.
 - **Write `CONVENTIONS.md`** documenting the module layout, naming, the service-interface pattern,
   API conventions, error handling, and a step-by-step "how to add a new module" checklist. This is
-  the contract Codex builds against.
+  the contract every session builds against.
 
 ---
 
@@ -375,12 +373,12 @@ succeeded plus an `errors` array. The frontend renders "couldn't find at X" — 
 | Background jobs | BullMQ + Redis (scraping, price refresh) |
 | Auth | NextAuth.js (single user now, multi-user-ready) |
 | Scraping | Playwright + Cheerio, behind ScraperAPI / Bright Data |
-| Styling | Tailwind (set up the theme; Codex builds the UI) |
+| Styling | Tailwind (theme + UI) |
 | Fuzzy matching | `string-similarity` |
 
 ---
 
-## Design System Tokens (set these up in the framework — Codex consumes them)
+## Design System Tokens (set these up in the framework)
 
 The brand is **DeWalt-style yellow on a warm, Claude-like cream canvas with charcoal ink.** Wire
 these into `globals.css` and extend the Tailwind theme so every component references tokens, never
@@ -412,7 +410,7 @@ raw hex.
 
 Hard rule for the theme: **never put white/light text on yellow** (use `--wb-yellow-ink`), and
 never use yellow as a large fill — it should feel like the painted accent on a power tool, not a
-highlighter. Document this in `CONVENTIONS.md` so Codex follows it.
+highlighter. Document this in `CONVENTIONS.md` so it's applied consistently.
 
 ---
 
@@ -452,5 +450,5 @@ highlighter. Document this in `CONVENTIONS.md` so Codex follows it.
 7. `CONVENTIONS.md` — module layout, service-interface pattern, API conventions, error handling,
    the yellow/cream design rules, and a "how to add a new module" checklist.
 
-**Handoff to Codex:** the schema, the service interfaces, the API route signatures, the design
-tokens, and `CONVENTIONS.md`. Keep those stable — Codex builds against them.
+**Keep stable across sessions:** the schema, the service interfaces, the API route signatures,
+the design tokens, and `CONVENTIONS.md`. The rest of the build — including the UI — layers on top.
