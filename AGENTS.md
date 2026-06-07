@@ -52,5 +52,5 @@ stable on purpose:
 - No default exports in shared modules (`lib/**`). Named exports only.
 - Money goes through `lib/core/money`; never raw float math on prices in the UI.
 - Migrations are **additive** — the core tables are referenced everywhere; don't rewrite them.
-- Design: yellow (`--wb-yellow`) is an accent only — CTAs, active nav, key highlights. Never
-  white/light text on yellow, never a large yellow fill. Full rules in `CONVENTIONS.md`.
+- Design: the green accent (`--wb-accent`) is accent only — primary CTA, active nav, best-deal,
+  focus rings. Never light text on the accent, never a large accent fill. Full rules in `CONVENTIONS.md`.

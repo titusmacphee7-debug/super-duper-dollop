@@ -132,23 +132,24 @@ formatMoney({ amount: listing.price, currency: listing.currency }); // "$99.00"
 
 ## 7. Design system (hard rules)
 
+Theme: **"Graphite Pro"** — neutral graphite-dark surfaces with a single calm green accent.
 Tokens are defined once in `app/globals.css` (`:root`) and surfaced as Tailwind colors in
-`tailwind.config.ts`. **Reference token names, never raw hex.**
+`tailwind.config.ts`; complex component styling is ported as `.wb-*` classes in `globals.css`.
+Fonts come from `next/font` (Archivo sans, IBM Plex Mono). **Reference token names, never raw hex.**
 
-| Token (CSS var)         | Tailwind class            | Use |
-|-------------------------|---------------------------|-----|
-| `--wb-yellow`           | `bg/text/ring-wb-yellow`  | ACCENT only: CTAs, active nav, key highlights, focus rings |
-| `--wb-yellow-hover`     | `bg-wb-yellow-hover`      | hover state of yellow CTAs |
-| `--wb-yellow-ink`       | `text-wb-yellow-ink`      | the ONLY text color allowed on yellow |
-| `--wb-bg`               | `bg-wb-bg`                | page canvas (warm near-black) |
-| `--wb-surface` / `-2`   | `bg-wb-surface` / `-2`    | cards / raised surfaces (elevation rises lighter) |
-| `--wb-ink` / `-muted` / `-faint` | `text-wb-ink` / `-muted` / `-faint` | primary / secondary / hint text |
-| `--wb-border`           | `border-wb-border`        | borders |
-| `--wb-success` / `-bg`  | `text/bg-wb-success`      | price drops, in-stock |
-| `--wb-danger` / `-bg`   | `text/bg-wb-danger`       | price rises, errors |
+| Token (CSS var)                         | Tailwind class                          | Use |
+|-----------------------------------------|-----------------------------------------|-----|
+| `--wb-accent` (+`-hover`/`-pressed`)    | `bg/text/ring-wb-accent` (+`-hover`/`-pressed`) | ACCENT only (green): primary CTA, active nav, best-deal border/tag, brand mark, focus rings, count chip |
+| `--wb-on-accent`                        | `text-wb-accent-ink`                    | the ONLY text color allowed on the accent |
+| `--wb-app` / `--wb-chrome`              | `bg-wb-app` / `bg-wb-chrome`            | page canvas (graphite) / sidebar·header·rail |
+| `--wb-surface` / `-raised` / `-hover`   | `bg-wb-surface` / `-raised` / `-hover`  | card / raised step / hover (elevation rises lighter) |
+| `--wb-border` / `-strong`               | `border-wb-border` / `-strong`          | borders (best-deal uses a 2px accent border) |
+| `--wb-ink` / `-2` / `-3` / `-dis`       | `text-wb-ink` / `-2` / `-3` / `-dis`    | primary / secondary / subtle / disabled text |
+| `--wb-green` / `-bg` / `-bd`            | `text/bg/border-wb-green` (+`-bg`/`-bd`) | in-stock, price drops |
+| `--wb-red` / `-bg` / `-bd`              | `text/bg/border-wb-red` (+`-bg`/`-bd`)  | out-of-stock, price rises, errors |
 
-**Non-negotiable:** yellow is the painted accent on a power tool, not a highlighter. Never a large
-fill, never a page background, and **never white/light text on yellow** — always `text-wb-yellow-ink`.
+**Non-negotiable:** green is the calm accent, used sparingly — not a highlighter. Never a large
+green fill, never a page background, and **never light text on the accent** — always `text-wb-accent-ink`.
 
 ---
 
