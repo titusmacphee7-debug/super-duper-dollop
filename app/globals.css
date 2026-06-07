@@ -341,23 +341,61 @@
     }
   }
 
-  /* ---------------- Body grid ---------------- */
-  .wb-body {
-    display: grid;
-    grid-template-columns: 1fr 360px;
-    gap: 24px;
+  /* ---------------- Page body (single centered column) ---------------- */
+  .wb-page {
     padding: 28px;
-    align-items: start;
-  }
-  .wb-main {
-    min-width: 0;
+    max-width: 960px;
+    width: 100%;
+    margin: 0 auto;
     display: flex;
     flex-direction: column;
     gap: 18px;
   }
-  .wb-rail {
-    position: sticky;
-    top: 96px;
+  .wb-navitem,
+  .wb-cta,
+  .wb-savebtn,
+  .wb-viewbtn,
+  .wb-rerun,
+  .wb-srclink,
+  .wb-inline-link {
+    text-decoration: none;
+  }
+  .wb-header-spacer {
+    flex: 1;
+  }
+  .wb-inline-link {
+    color: var(--wb-accent);
+    font-weight: 600;
+  }
+  .wb-inline-link:hover {
+    color: var(--wb-accent-hover);
+  }
+
+  /* ---------------- Wishlist page ---------------- */
+  .wb-wishlist-head {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .wb-wishlist-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .wb-wishlist-title h1 {
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -0.3px;
+  }
+  .wb-savegrid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+  @media (max-width: 720px) {
+    .wb-savegrid {
+      grid-template-columns: 1fr;
+    }
   }
 
   /* ---------------- Source product ---------------- */
@@ -939,22 +977,7 @@
     color: var(--wb-ink-3);
   }
 
-  /* ---------------- Wishlist panel ---------------- */
-  .wb-panel {
-    background: var(--wb-chrome);
-    border: 1px solid var(--wb-border);
-    border-radius: 16px;
-    padding: 20px;
-  }
-  .wb-panel-head {
-    display: flex;
-    align-items: center;
-    gap: 9px;
-  }
-  .wb-panel-head h2 {
-    font-size: 15px;
-    font-weight: 700;
-  }
+  /* ---------------- Saved wishlist entries ---------------- */
   .wb-panel-count {
     font-family: var(--wb-mono);
     font-size: 11px;
@@ -970,22 +993,6 @@
     color: var(--wb-ink-3);
     margin-top: 5px;
     font-family: var(--wb-mono);
-  }
-  .wb-panel-empty {
-    margin-top: 16px;
-    padding: 22px 14px;
-    border: 1px dashed var(--wb-border);
-    border-radius: 11px;
-    text-align: center;
-    font-size: 12.5px;
-    color: var(--wb-ink-3);
-    font-family: var(--wb-mono);
-  }
-  .wb-savelist {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    margin-top: 16px;
   }
   .wb-saverow {
     background: var(--wb-surface);

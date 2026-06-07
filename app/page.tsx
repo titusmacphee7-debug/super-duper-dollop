@@ -1,6 +1,6 @@
-import { CompareScreen } from "@/components/wishlist/CompareScreen";
+import { redirect } from "next/navigation";
 
-// Feature 1 — the Shop Wishlist compare screen is the app's home.
+// The app opens on the Compare (search) screen.
 export default function Page() {
-  return <CompareScreen />;
+  redirect("/compare");
 }

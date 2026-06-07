@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Icon, type IconName } from "./icons";
 import {
   fmt,
@@ -10,12 +11,17 @@ import {
   type RetailerError,
 } from "./view-model";
 
-const NAV_ITEMS: [IconName, string][] = [
-  ["wishlist", "Wishlist"],
-  ["projects", "Projects"],
-  ["inventory", "Inventory"],
-  ["tools", "Tools"],
-  ["expenses", "Expenses"],
+export type NavKey = "compare" | "wishlist";
+
+const NAV_LINKS: { key: NavKey; label: string; icon: IconName; href: string }[] = [
+  { key: "compare", label: "Compare", icon: "search", href: "/compare" },
+  { key: "wishlist", label: "Wishlist", icon: "wishlist", href: "/wishlist" },
+];
+const NAV_SOON: { label: string; icon: IconName }[] = [
+  { label: "Projects", icon: "projects" },
+  { label: "Inventory", icon: "inventory" },
+  { label: "Tools", icon: "tools" },
+  { label: "Expenses", icon: "expenses" },
 ];
 
 function shortUrl(url: string): string {
@@ -23,7 +29,7 @@ function shortUrl(url: string): string {
 }
 
 // ---------------- Sidebar ----------------
-export function Sidebar({ active = "wishlist" }: { active?: IconName }) {
+export function Sidebar({ active }: { active: NavKey }) {
   return (
     <aside className="wb-sidebar">
       <div className="wb-brandmark">
@@ -32,23 +38,27 @@ export function Sidebar({ active = "wishlist" }: { active?: IconName }) {
         </span>
       </div>
       <nav className="wb-nav">
-        {NAV_ITEMS.map(([key, label]) => {
+        {NAV_LINKS.map(({ key, label, icon, href }) => {
           const isActive = active === key;
           return (
-            <button
+            <Link
               key={key}
-              type="button"
+              href={href}
               className={"wb-navitem" + (isActive ? " is-active" : "")}
               aria-current={isActive ? "page" : undefined}
-              disabled={!isActive}
-              title={isActive ? undefined : "Coming soon"}
             >
-              <Icon name={key} />
+              <Icon name={icon} />
               <span>{label}</span>
               {isActive && <span className="wb-nav-rail" />}
-            </button>
+            </Link>
           );
         })}
+        {NAV_SOON.map(({ label, icon }) => (
+          <button key={label} type="button" className="wb-navitem" disabled title="Coming soon">
+            <Icon name={icon} />
+            <span>{label}</span>
+          </button>
+        ))}
       </nav>
       <div className="wb-sidebar-foot">
         <div className="wb-avatar">JM</div>
@@ -95,8 +105,8 @@ export function Header({
           onKeyDown={(e) => {
             if (e.key === "Enter" && !busy) onCompare();
           }}
-          placeholder="Paste a product URL to compare prices…"
-          aria-label="Product URL"
+          placeholder="Paste a product URL or type a product name…"
+          aria-label="Product URL or name"
         />
         <button className="wb-cta" disabled={busy} onClick={onCompare}>
           {busy ? (
@@ -331,53 +341,38 @@ function PriceDelta({ from, to }: { from: number | null; to: number | null }) {
   );
 }
 
-export function WishlistPanel({ name, entries }: { name: string; entries: EntryView[] }) {
+export function SavedEntryCard({ entry: e }: { entry: EntryView }) {
   return (
-    <section className="wb-panel">
-      <div className="wb-panel-head">
-        <h2>Saved wishlist</h2>
-        <span className="wb-panel-count">{entries.length}</span>
-      </div>
-      <div className="wb-panel-sub">{name} · price-tracked since save</div>
-      {entries.length === 0 ? (
-        <div className="wb-panel-empty">No saved items yet — save a product to track its price.</div>
-      ) : (
-        <div className="wb-savelist">
-          {entries.map((e) => (
-            <div key={e.id} className={"wb-saverow" + (e.acquired ? " is-acquired" : "")}>
-              <div className="wb-saverow-top">
-                <div className="wb-save-name">
-                  {e.brand && <span className="wb-save-brand">{e.brand} </span>}
-                  {e.name}
-                </div>
-                {e.acquired && (
-                  <span className="wb-acq">
-                    <Icon name="check" size={12} /> Got it
-                  </span>
-                )}
-              </div>
-              {e.modelNumber && <div className="wb-save-model">{e.modelNumber}</div>}
-              <div className="wb-saverow-bot">
-                <div className="wb-save-price">
-                  <span className="wb-save-now">{fmt(e.currentPrice)}</span>
-                  <span className="wb-save-at">saved at {fmt(e.priceAtSave)}</span>
-                </div>
-                {e.acquired ? (
-                  <span className="wb-delta wb-delta--flat">Acquired</span>
-                ) : (
-                  <PriceDelta from={e.priceAtSave} to={e.currentPrice} />
-                )}
-              </div>
-              <div className="wb-save-foot">
-                <span className={"wb-save-stock " + (e.inStock ? "" : "is-out")}>
-                  <i className="wb-dot" />
-                  {e.inStock ? e.cheapestRetailer ?? "In stock" : "Out of stock"}
-                </span>
-              </div>
-            </div>
-          ))}
+    <div className={"wb-saverow" + (e.acquired ? " is-acquired" : "")}>
+      <div className="wb-saverow-top">
+        <div className="wb-save-name">
+          {e.brand && <span className="wb-save-brand">{e.brand} </span>}
+          {e.name}
         </div>
-      )}
-    </section>
+        {e.acquired && (
+          <span className="wb-acq">
+            <Icon name="check" size={12} /> Got it
+          </span>
+        )}
+      </div>
+      {e.modelNumber && <div className="wb-save-model">{e.modelNumber}</div>}
+      <div className="wb-saverow-bot">
+        <div className="wb-save-price">
+          <span className="wb-save-now">{fmt(e.currentPrice)}</span>
+          <span className="wb-save-at">saved at {fmt(e.priceAtSave)}</span>
+        </div>
+        {e.acquired ? (
+          <span className="wb-delta wb-delta--flat">Acquired</span>
+        ) : (
+          <PriceDelta from={e.priceAtSave} to={e.currentPrice} />
+        )}
+      </div>
+      <div className="wb-save-foot">
+        <span className={"wb-save-stock " + (e.inStock ? "" : "is-out")}>
+          <i className="wb-dot" />
+          {e.inStock ? e.cheapestRetailer ?? "In stock" : "Out of stock"}
+        </span>
+      </div>
+    </div>
   );
 }
