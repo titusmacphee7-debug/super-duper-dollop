@@ -3,49 +3,1170 @@
 @tailwind utilities;
 
 /*
- * Workshop Buddy design tokens — the contract for all UI.
- * Brand: DeWalt yellow accent on a warm near-black canvas with off-white ink (dark theme).
- * Yellow is an ACCENT only (CTAs, active nav, key highlights, focus rings) — never a
- * page background, never a large fill, and NEVER white/light text on yellow.
+ * Workshop Buddy design tokens — "Graphite Pro" (the contract for all UI).
+ * Neutral graphite-dark surfaces with a single calm green accent. Brand-neutral
+ * (tools, lumber, hardware, finishes). The accent is used SPARINGLY — primary CTA,
+ * active nav, best-deal border/tag, brand mark, focus rings, count chip, top pip.
+ * Never a large green fill; never light text on green (always --wb-on-accent).
  */
 :root {
   color-scheme: dark;
 
-  /* Brand — DeWalt yellow, an ACCENT, never a page background */
-  --wb-yellow: #ffb81c; /* CTAs, active nav, key highlights, brand mark, focus rings */
-  --wb-yellow-hover: #ffc94d; /* hover state of yellow CTAs */
-  --wb-yellow-ink: #231b07; /* dark text that goes ON yellow */
+  --wb-black: #000000;
+  --wb-app: #101316; /* page canvas (the centered frame) */
+  --wb-chrome: #14181c; /* sidebar / header / rail panel */
+  --wb-surface: #171b1f; /* card surface */
+  --wb-raised: #1f252a; /* raised step (source card, monograms) */
+  --wb-hover: #232a30; /* card hover */
+  --wb-border: #2a3137;
+  --wb-border-strong: #3a434b;
+  --wb-hover-border: #454f59; /* card hover border (neutral, replaces legacy tint) */
 
-  /* Surfaces — warm near-black; elevation rises lighter */
-  --wb-bg: #141310; /* page canvas */
-  --wb-surface: #1f1d18; /* cards (raised) */
-  --wb-surface-2: #2a2720; /* secondary / hover panels (raised more) */
+  /* Accent (green) — was named --wb-yellow in the prototype; renamed to --wb-accent */
+  --wb-accent: #46b98a;
+  --wb-accent-hover: #5ed0a0;
+  --wb-accent-pressed: #2e9c71;
+  --wb-on-accent: #06140d; /* the only text color allowed on the accent */
+  --wb-focus: rgba(70, 185, 138, 0.5);
 
-  /* Ink — warm off-white on near-black */
-  --wb-ink: #f3f0e7; /* primary text */
-  --wb-muted: #ada690; /* secondary text */
-  --wb-faint: #7e776a; /* hints */
-  --wb-border: #312d24;
+  --wb-ink: #eceff2; /* primary text */
+  --wb-ink-2: #98a1aa; /* secondary text */
+  --wb-ink-3: #6b747c; /* subtle / meta text */
+  --wb-ink-dis: #4a525a; /* disabled text */
 
-  /* Semantic — tuned for dark backgrounds */
-  --wb-success: #5bc68c;
-  --wb-success-bg: #16271e; /* price drops, in-stock */
-  --wb-danger: #f0796a;
-  --wb-danger-bg: #2c1816; /* price rises, errors */
+  --wb-green: #46b98a; /* in-stock / price drop */
+  --wb-green-bg: #14241d;
+  --wb-green-bd: #234a38;
+  --wb-red: #e0655a; /* out-of-stock / price rise */
+  --wb-red-bg: #2a1714;
+  --wb-red-bd: #4e2722;
+
+  --wb-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --wb-spring: cubic-bezier(0.34, 1.4, 0.6, 1);
+  /* Font families are provided by next/font (app/layout.tsx) as --font-sans/--font-mono. */
+  --wb-sans: var(--font-sans), "Archivo", system-ui, sans-serif;
+  --wb-mono: var(--font-mono), "IBM Plex Mono", ui-monospace, monospace;
 }
 
 @layer base {
+  html,
   body {
-    background-color: var(--wb-bg);
+    background: var(--wb-black);
+  }
+  body {
+    font-family: var(--wb-sans);
     color: var(--wb-ink);
     -webkit-font-smoothing: antialiased;
   }
-  a {
-    color: inherit;
+  button {
+    font-family: inherit;
+    cursor: pointer;
   }
-  /* Yellow accent focus ring for keyboard users. */
+  input {
+    font-family: inherit;
+  }
+  /* Accent focus ring for keyboard users (components override with a tighter ring). */
   :focus-visible {
-    outline: 2px solid var(--wb-yellow);
+    outline: 2px solid var(--wb-accent);
     outline-offset: 2px;
+  }
+}
+
+/* ============================ Shop Wishlist screen ============================ */
+@layer components {
+  .wb-root {
+    width: 1440px;
+    max-width: 100%;
+    margin: 0 auto;
+    min-height: 100vh;
+    background: var(--wb-app);
+    display: grid;
+    grid-template-columns: 236px 1fr;
+    box-shadow: 0 0 0 1px #20262b;
+  }
+  @media (max-width: 1480px) {
+    .wb-root {
+      box-shadow: none;
+    }
+  }
+
+  /* ---------------- Sidebar ---------------- */
+  .wb-sidebar {
+    background: var(--wb-chrome);
+    border-right: 1px solid var(--wb-border);
+    display: flex;
+    flex-direction: column;
+    padding: 22px 16px;
+    gap: 30px;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+  }
+  .wb-brandmark {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 4px 8px;
+  }
+  .wb-brandmark-bolt {
+    width: 34px;
+    height: 34px;
+    border-radius: 9px;
+    display: grid;
+    place-items: center;
+    background: var(--wb-accent);
+    color: var(--wb-on-accent);
+    box-shadow: inset 0 0 0 1px var(--wb-accent-pressed);
+  }
+  .wb-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    flex: 1;
+  }
+  .wb-navitem {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 12px;
+    border-radius: 9px;
+    color: var(--wb-ink-2);
+    background: none;
+    border: none;
+    width: 100%;
+    text-align: left;
+    font-size: 14.5px;
+    font-weight: 600;
+    letter-spacing: 0.1px;
+    transition: background 0.18s var(--wb-ease), color 0.18s var(--wb-ease), box-shadow 0.18s var(--wb-ease);
+  }
+  .wb-navitem svg {
+    color: var(--wb-ink-3);
+    transition: 0.14s;
+    flex: none;
+  }
+  .wb-navitem:hover {
+    background: var(--wb-hover);
+    color: var(--wb-ink);
+  }
+  .wb-navitem:hover svg {
+    color: var(--wb-ink-2);
+  }
+  .wb-navitem.is-active {
+    background: var(--wb-raised);
+    color: var(--wb-ink);
+    box-shadow: 0 0 0 1px var(--wb-border-strong) inset;
+  }
+  .wb-navitem.is-active svg {
+    color: var(--wb-accent);
+  }
+  .wb-navitem:disabled {
+    cursor: default;
+  }
+  .wb-nav-rail {
+    position: absolute;
+    left: -16px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 4px;
+    height: 24px;
+    background: var(--wb-accent);
+    border-radius: 0 4px 4px 0;
+  }
+  .wb-sidebar-foot {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    padding: 12px 8px;
+    border-top: 1px solid var(--wb-border);
+  }
+  .wb-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 9px;
+    background: var(--wb-raised);
+    box-shadow: 0 0 0 1px var(--wb-border-strong) inset;
+    display: grid;
+    place-items: center;
+    font-weight: 700;
+    font-size: 13px;
+    color: var(--wb-ink-2);
+  }
+  .wb-foot-name {
+    font-size: 13.5px;
+    font-weight: 600;
+  }
+  .wb-foot-sub {
+    font-size: 11.5px;
+    color: var(--wb-ink-3);
+    font-family: var(--wb-mono);
+    margin-top: 2px;
+  }
+
+  /* ---------------- Header ---------------- */
+  .wb-shell {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+  .wb-header {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    background: var(--wb-chrome);
+    border-bottom: 1px solid var(--wb-border);
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    padding: 0 28px;
+    height: 68px;
+  }
+  .wb-wordmark {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    flex: none;
+  }
+  .wb-wordmark-bolt {
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    background: var(--wb-accent);
+    color: var(--wb-on-accent);
+    display: grid;
+    place-items: center;
+  }
+  .wb-wordmark-text {
+    font-weight: 800;
+    font-size: 15px;
+    letter-spacing: 1.4px;
+  }
+  .wb-wordmark-thin {
+    font-weight: 500;
+    color: var(--wb-ink-2);
+  }
+  .wb-urlbar {
+    flex: 1;
+    max-width: 760px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--wb-surface);
+    border: 1px solid var(--wb-border);
+    border-radius: 11px;
+    padding: 0 8px 0 14px;
+    height: 44px;
+    transition: 0.15s;
+  }
+  .wb-urlbar:focus-within {
+    border-color: var(--wb-accent-pressed);
+    box-shadow: 0 0 0 2px var(--wb-focus);
+  }
+  .wb-urlbar-icon {
+    color: var(--wb-ink-3);
+    display: flex;
+    flex: none;
+  }
+  .wb-urlinput {
+    flex: 1;
+    background: none;
+    border: none;
+    outline: none;
+    color: var(--wb-ink);
+    font-size: 14px;
+    font-family: var(--wb-mono);
+    letter-spacing: -0.2px;
+    min-width: 0;
+  }
+  .wb-urlinput::placeholder {
+    color: var(--wb-ink-3);
+    font-family: var(--wb-sans);
+  }
+  .wb-cta {
+    flex: none;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    height: 32px;
+    padding: 0 16px;
+    border-radius: 8px;
+    border: none;
+    background: var(--wb-accent);
+    color: var(--wb-on-accent);
+    font-weight: 700;
+    font-size: 13.5px;
+    letter-spacing: 0.2px;
+    box-shadow: 0 2px 0 var(--wb-accent-pressed);
+  }
+  .wb-cta:hover {
+    background: var(--wb-accent-hover);
+  }
+  .wb-cta:active {
+    background: var(--wb-accent-pressed);
+    box-shadow: 0 1px 0 var(--wb-accent-pressed);
+  }
+  .wb-cta:disabled {
+    background: #1b2126;
+    color: var(--wb-ink-dis);
+    box-shadow: none;
+    cursor: default;
+  }
+  .wb-cta--sm {
+    height: 30px;
+    padding: 0 13px;
+    font-size: 12.5px;
+  }
+  .wb-header-meta {
+    display: flex;
+    gap: 4px;
+    flex: none;
+  }
+  .wb-kbd {
+    font-family: var(--wb-mono);
+    font-size: 11px;
+    color: var(--wb-ink-3);
+    background: var(--wb-surface);
+    border: 1px solid var(--wb-border);
+    border-radius: 5px;
+    padding: 3px 6px;
+  }
+  .wb-spin {
+    display: inline-flex;
+    animation: wb-spin 1s linear infinite;
+  }
+  @keyframes wb-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  /* ---------------- Body grid ---------------- */
+  .wb-body {
+    display: grid;
+    grid-template-columns: 1fr 360px;
+    gap: 24px;
+    padding: 28px;
+    align-items: start;
+  }
+  .wb-main {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+  .wb-rail {
+    position: sticky;
+    top: 96px;
+  }
+
+  /* ---------------- Source product ---------------- */
+  .wb-source {
+    display: grid;
+    grid-template-columns: 168px 1fr;
+    gap: 22px;
+    background: var(--wb-raised);
+    border: 1px solid var(--wb-border-strong);
+    border-radius: 16px;
+    padding: 22px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+    animation: wb-risein 0.55s var(--wb-ease) both;
+  }
+  @keyframes wb-risein {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  .wb-source-img {
+    border-radius: 11px;
+    border: 1px solid var(--wb-border);
+    position: relative;
+    overflow: hidden;
+    background: repeating-linear-gradient(135deg, #1c2228 0 11px, #161b20 11px 22px);
+    display: grid;
+    place-items: center;
+    min-height: 168px;
+  }
+  .wb-source-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .wb-imgnote {
+    font-family: var(--wb-mono);
+    font-size: 11px;
+    color: var(--wb-ink-3);
+    background: rgba(3, 3, 3, 0.7);
+    padding: 4px 9px;
+    border-radius: 6px;
+    border: 1px solid var(--wb-border);
+  }
+  .wb-source-body {
+    display: flex;
+    flex-direction: column;
+    gap: 11px;
+    min-width: 0;
+  }
+  .wb-source-brandrow {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .wb-brandtag {
+    font-weight: 800;
+    font-size: 12px;
+    letter-spacing: 2px;
+    color: var(--wb-ink);
+  }
+  .wb-source-cat {
+    font-family: var(--wb-mono);
+    font-size: 11px;
+    color: var(--wb-ink-3);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border: 1px solid var(--wb-border);
+    border-radius: 5px;
+    padding: 2px 7px;
+  }
+  .wb-source-name {
+    font-size: 28px;
+    font-weight: 800;
+    line-height: 1.08;
+    letter-spacing: -0.5px;
+    text-wrap: balance;
+  }
+  .wb-source-ids {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-family: var(--wb-mono);
+    font-size: 12px;
+    color: var(--wb-ink-3);
+  }
+  .wb-source-ids b {
+    color: var(--wb-ink-2);
+    font-weight: 600;
+  }
+  .wb-sep {
+    width: 1px;
+    height: 13px;
+    background: var(--wb-border-strong);
+  }
+  .wb-spec-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    margin-top: 2px;
+  }
+  .wb-spec {
+    font-size: 12px;
+    color: var(--wb-ink-2);
+    background: var(--wb-surface);
+    border: 1px solid var(--wb-border);
+    border-radius: 6px;
+    padding: 4px 9px;
+    white-space: nowrap;
+  }
+  .wb-source-foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: auto;
+    padding-top: 8px;
+  }
+  .wb-srclink {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--wb-mono);
+    font-size: 12px;
+    color: var(--wb-ink-2);
+    text-decoration: none;
+  }
+  .wb-srclink svg {
+    color: var(--wb-ink-3);
+  }
+  .wb-savebtn {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    height: 38px;
+    padding: 0 16px;
+    border-radius: 9px;
+    background: var(--wb-surface);
+    border: 1px solid var(--wb-border-strong);
+    color: var(--wb-ink);
+    font-weight: 600;
+    font-size: 13.5px;
+  }
+  .wb-savebtn:hover {
+    background: var(--wb-hover);
+    border-color: var(--wb-accent-pressed);
+  }
+  .wb-savebtn.is-saved {
+    color: var(--wb-accent);
+    border-color: var(--wb-accent-pressed);
+    box-shadow: inset 0 0 0 1px var(--wb-accent-pressed);
+  }
+  .wb-savebtn svg {
+    transition: transform 0.2s var(--wb-spring);
+  }
+  .wb-savebtn.is-saved svg {
+    animation: wb-flagpop 0.35s var(--wb-spring) both;
+  }
+
+  /* ---------------- Results head ---------------- */
+  .wb-results-head {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 0 2px;
+    margin-top: 4px;
+  }
+  .wb-results-title h2 {
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+  }
+  .wb-results-meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12.5px;
+    color: var(--wb-ink-3);
+    margin-top: 5px;
+    font-family: var(--wb-mono);
+  }
+  .wb-rerun {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    height: 34px;
+    padding: 0 13px;
+    border-radius: 8px;
+    border: 1px solid var(--wb-border-strong);
+    background: var(--wb-surface);
+    color: var(--wb-ink-2);
+    font-weight: 600;
+    font-size: 13px;
+  }
+  .wb-rerun:hover:not(:disabled) {
+    background: var(--wb-hover);
+    color: var(--wb-ink);
+  }
+  .wb-rerun:disabled {
+    opacity: 0.45;
+    cursor: default;
+  }
+
+  /* ---------------- Retailer card ---------------- */
+  .wb-rlist {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .wb-rcard {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 20px;
+    align-items: center;
+    background: var(--wb-surface);
+    border: 1px solid var(--wb-border-strong);
+    border-radius: 14px;
+    padding: 18px 20px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+    transition: transform 0.26s var(--wb-ease), border-color 0.2s var(--wb-ease), background 0.2s var(--wb-ease),
+      box-shadow 0.26s var(--wb-ease);
+    animation: wb-cardin 0.5s var(--wb-ease) both;
+  }
+  @keyframes wb-cardin {
+    from {
+      transform: translateY(10px);
+      opacity: 0;
+    }
+    to {
+      transform: none;
+      opacity: 1;
+    }
+  }
+  .wb-rcard:hover {
+    background: var(--wb-raised);
+    border-color: var(--wb-hover-border);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.5);
+  }
+  .wb-rcard.is-out {
+    opacity: 0.66;
+  }
+  .wb-rcard-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    min-width: 0;
+  }
+  .wb-rmark {
+    flex: none;
+    width: 52px;
+    height: 52px;
+    border-radius: 11px;
+    display: grid;
+    place-items: center;
+    font-weight: 800;
+    font-size: 18px;
+    text-transform: lowercase;
+    color: var(--mark, #fff);
+    background: var(--wb-raised);
+    border: 1px solid var(--wb-border-strong);
+    transition: transform 0.22s var(--wb-spring);
+  }
+  .wb-rcard:hover .wb-rmark {
+    transform: scale(1.05) rotate(-2deg);
+  }
+  .wb-rmark--ghost {
+    color: var(--wb-ink-dis);
+    background: var(--wb-surface);
+  }
+  .wb-rcard-id {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .wb-rname {
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: 0.1px;
+  }
+  .wb-rurl {
+    font-family: var(--wb-mono);
+    font-size: 11.5px;
+    color: var(--wb-ink-3);
+    text-decoration: none;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 320px;
+  }
+  .wb-rtags {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    margin-top: 5px;
+  }
+  .wb-rcard-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 9px;
+  }
+  .wb-priceblock {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    line-height: 1;
+  }
+  .wb-was {
+    font-size: 12px;
+    color: var(--wb-ink-3);
+    text-decoration: line-through;
+    font-family: var(--wb-mono);
+    margin-bottom: 3px;
+  }
+  .wb-price {
+    font-size: 34px;
+    font-weight: 800;
+    letter-spacing: -1px;
+    font-variant-numeric: tabular-nums;
+  }
+  .wb-rcard.is-best .wb-price {
+    font-size: 40px;
+    letter-spacing: -1.4px;
+  }
+  .wb-shipping {
+    font-size: 11.5px;
+    color: var(--wb-ink-2);
+    margin-top: 6px;
+    font-family: var(--wb-mono);
+  }
+  .wb-viewbtn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    height: 34px;
+    padding: 0 14px;
+    border-radius: 8px;
+    background: var(--wb-surface);
+    border: 1px solid var(--wb-border-strong);
+    color: var(--wb-ink);
+    font-weight: 600;
+    font-size: 13px;
+  }
+  .wb-viewbtn:hover:not(:disabled) {
+    background: var(--wb-hover);
+    border-color: var(--wb-accent-pressed);
+  }
+  .wb-viewbtn:disabled {
+    color: var(--wb-ink-dis);
+    border-color: var(--wb-border);
+    background: var(--wb-surface);
+    cursor: default;
+  }
+  .wb-viewbtn.is-primary {
+    background: var(--wb-accent);
+    color: var(--wb-on-accent);
+    border-color: var(--wb-accent-pressed);
+    box-shadow: 0 2px 0 var(--wb-accent-pressed);
+  }
+  .wb-viewbtn.is-primary:hover:not(:disabled) {
+    background: var(--wb-accent-hover);
+  }
+
+  /* best deal — baked highlight = 2px accent border */
+  .wb-bestflag {
+    position: absolute;
+    top: -10px;
+    left: 18px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    height: 22px;
+    padding: 0 11px;
+    border-radius: 6px;
+    background: var(--wb-accent);
+    color: var(--wb-on-accent);
+    font-weight: 800;
+    font-size: 11px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    animation: wb-flagpop 0.42s var(--wb-spring) both;
+  }
+  @keyframes wb-flagpop {
+    from {
+      opacity: 0;
+      transform: scale(0.6) translateY(3px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  .wb-rcard.is-best {
+    border: 2px solid var(--wb-accent);
+    padding: 17px 19px;
+  }
+
+  /* ---------------- Tags ---------------- */
+  .wb-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    font-weight: 600;
+    border-radius: 6px;
+    padding: 3px 8px;
+    letter-spacing: 0.2px;
+  }
+  .wb-tag--cond {
+    border: 1px solid var(--wb-border-strong);
+    color: var(--wb-ink-2);
+    background: var(--wb-surface);
+  }
+  .cond-new {
+    color: var(--wb-ink);
+  }
+  .cond-renewed,
+  .cond-openbox,
+  .cond-used {
+    color: var(--wb-ink-2);
+    background: var(--wb-raised);
+  }
+  .wb-tag--stock {
+    font-family: var(--wb-mono);
+  }
+  .wb-tag--stock.is-in {
+    color: var(--wb-green);
+    background: var(--wb-green-bg);
+    border: 1px solid var(--wb-green-bd);
+  }
+  .wb-tag--stock.is-out {
+    color: var(--wb-red);
+    background: var(--wb-red-bg);
+    border: 1px solid var(--wb-red-bd);
+  }
+  .wb-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+
+  /* ---------------- Match pip ---------------- */
+  .wb-pip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--wb-mono);
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--wb-ink-2);
+    padding: 3px 8px;
+    border-radius: 6px;
+    border: 1px solid var(--wb-border);
+    background: var(--wb-surface);
+  }
+  .wb-pip-dots {
+    display: flex;
+    gap: 2px;
+  }
+  .wb-pip-dots i {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--wb-ink-dis);
+  }
+  .wb-pip-dots i.on {
+    background: var(--wb-ink-3);
+  }
+  .wb-pip--gold {
+    color: var(--wb-accent);
+    border-color: var(--wb-accent-pressed);
+    background: var(--wb-green-bg);
+  }
+  .wb-pip--gold .wb-pip-dots i.on {
+    background: var(--wb-accent);
+  }
+  .wb-pip--strong {
+    color: #b7c0c8;
+  }
+  .wb-pip--strong .wb-pip-dots i.on {
+    background: #b7c0c8;
+  }
+  .wb-pip--low {
+    color: var(--wb-ink-3);
+  }
+
+  /* ---------------- Skeleton ---------------- */
+  .wb-rcard.is-skeleton {
+    animation: none;
+    border-style: dashed;
+    border-color: var(--wb-border);
+  }
+  .wb-rcard.is-skeleton:hover {
+    transform: none;
+    background: var(--wb-surface);
+    border-color: var(--wb-border);
+  }
+  .wb-skel-text,
+  .wb-sk-mark {
+    position: relative;
+    overflow: hidden;
+    background: var(--wb-raised);
+    border-radius: 5px;
+    height: 13px;
+  }
+  .wb-sk-mark {
+    color: transparent;
+    border: 1px solid var(--wb-border);
+  }
+  .wb-skel-text::after,
+  .wb-sk-mark::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background: linear-gradient(90deg, transparent, rgba(255, 247, 230, 0.06), transparent);
+    animation: wb-shimmer 1.25s infinite;
+  }
+  @keyframes wb-shimmer {
+    100% {
+      transform: translateX(100%);
+    }
+  }
+  .wb-rname.wb-skel-text {
+    height: 16px;
+  }
+  .wb-sk-label {
+    position: absolute;
+    right: 20px;
+    bottom: 14px;
+    font-family: var(--wb-mono);
+    font-size: 11px;
+    color: var(--wb-ink-3);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .wb-sk-label::before {
+    content: "";
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--wb-accent);
+    animation: wb-pulse 1s infinite;
+  }
+  @keyframes wb-pulse {
+    50% {
+      opacity: 0.3;
+    }
+  }
+
+  /* ---------------- Miss card ---------------- */
+  .wb-rcard.is-miss {
+    border-style: dashed;
+    background: #0a0907;
+  }
+  .wb-rcard.is-miss:hover {
+    transform: none;
+    border-color: var(--wb-border-strong);
+    background: #0a0907;
+  }
+  .wb-miss-line {
+    font-size: 13.5px;
+    color: var(--wb-ink-2);
+    font-weight: 600;
+  }
+  .wb-miss-sub {
+    font-family: var(--wb-mono);
+    font-size: 11px;
+    color: var(--wb-ink-3);
+  }
+
+  /* ---------------- Wishlist panel ---------------- */
+  .wb-panel {
+    background: var(--wb-chrome);
+    border: 1px solid var(--wb-border);
+    border-radius: 16px;
+    padding: 20px;
+  }
+  .wb-panel-head {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+  }
+  .wb-panel-head h2 {
+    font-size: 15px;
+    font-weight: 700;
+  }
+  .wb-panel-count {
+    font-family: var(--wb-mono);
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--wb-accent);
+    background: var(--wb-green-bg);
+    border: 1px solid var(--wb-accent-pressed);
+    border-radius: 20px;
+    padding: 2px 9px;
+  }
+  .wb-panel-sub {
+    font-size: 11.5px;
+    color: var(--wb-ink-3);
+    margin-top: 5px;
+    font-family: var(--wb-mono);
+  }
+  .wb-panel-empty {
+    margin-top: 16px;
+    padding: 22px 14px;
+    border: 1px dashed var(--wb-border);
+    border-radius: 11px;
+    text-align: center;
+    font-size: 12.5px;
+    color: var(--wb-ink-3);
+    font-family: var(--wb-mono);
+  }
+  .wb-savelist {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 16px;
+  }
+  .wb-saverow {
+    background: var(--wb-surface);
+    border: 1px solid var(--wb-border);
+    border-radius: 11px;
+    padding: 13px 14px;
+    transition: transform 0.18s var(--wb-ease), background 0.18s var(--wb-ease), border-color 0.18s var(--wb-ease);
+  }
+  .wb-saverow:hover {
+    background: var(--wb-raised);
+    border-color: var(--wb-border-strong);
+    transform: translateX(3px);
+  }
+  .wb-saverow.is-acquired {
+    opacity: 0.6;
+  }
+  .wb-saverow-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .wb-save-name {
+    font-size: 13.5px;
+    font-weight: 600;
+    line-height: 1.3;
+  }
+  .wb-save-brand {
+    color: var(--wb-ink-2);
+    font-weight: 800;
+    font-size: 10.5px;
+    letter-spacing: 1px;
+  }
+  .wb-acq {
+    flex: none;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 10.5px;
+    font-weight: 700;
+    color: var(--wb-green);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .wb-save-model {
+    font-family: var(--wb-mono);
+    font-size: 10.5px;
+    color: var(--wb-ink-3);
+    margin-top: 3px;
+  }
+  .wb-saverow-bot {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 11px;
+  }
+  .wb-save-price {
+    display: flex;
+    flex-direction: column;
+    line-height: 1;
+  }
+  .wb-save-now {
+    font-size: 19px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    font-variant-numeric: tabular-nums;
+  }
+  .wb-save-at {
+    font-family: var(--wb-mono);
+    font-size: 10.5px;
+    color: var(--wb-ink-3);
+    margin-top: 5px;
+  }
+  .wb-save-foot {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--wb-border);
+  }
+  .wb-save-stock {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--wb-mono);
+    font-size: 11px;
+    color: var(--wb-ink-2);
+  }
+  .wb-save-stock .wb-dot {
+    color: var(--wb-green);
+  }
+  .wb-save-stock.is-out {
+    color: var(--wb-red);
+  }
+  .wb-save-stock.is-out .wb-dot {
+    color: var(--wb-red);
+  }
+
+  /* ---------------- Price delta ---------------- */
+  .wb-delta {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11.5px;
+    font-weight: 700;
+    border-radius: 6px;
+    padding: 4px 8px;
+    font-variant-numeric: tabular-nums;
+  }
+  .wb-delta--drop {
+    color: var(--wb-green);
+    background: var(--wb-green-bg);
+    border: 1px solid var(--wb-green-bd);
+  }
+  .wb-delta--rise {
+    color: var(--wb-red);
+    background: var(--wb-red-bg);
+    border: 1px solid var(--wb-red-bd);
+  }
+  .wb-delta--flat {
+    color: var(--wb-ink-3);
+    background: var(--wb-surface);
+    border: 1px solid var(--wb-border);
+  }
+
+  /* ---------------- Results error / empty ---------------- */
+  .wb-results-error {
+    border: 1px dashed var(--wb-red-bd);
+    background: var(--wb-red-bg);
+    color: var(--wb-red);
+    border-radius: 14px;
+    padding: 18px 20px;
+    font-size: 13px;
+    font-family: var(--wb-mono);
+  }
+  .wb-results-empty {
+    border: 1px dashed var(--wb-border);
+    background: var(--wb-surface);
+    border-radius: 14px;
+    padding: 40px 24px;
+    text-align: center;
+    color: var(--wb-ink-3);
+    font-family: var(--wb-mono);
+    font-size: 13px;
+  }
+
+  /* ---------------- Motion & focus polish ---------------- */
+  .wb-cta:active:not(:disabled),
+  .wb-viewbtn:active:not(:disabled),
+  .wb-savebtn:active,
+  .wb-rerun:active:not(:disabled) {
+    transform: translateY(1px) scale(0.97);
+  }
+  .wb-cta,
+  .wb-viewbtn,
+  .wb-savebtn,
+  .wb-rerun {
+    transition: transform 0.14s var(--wb-spring), background 0.18s var(--wb-ease), border-color 0.18s var(--wb-ease),
+      box-shadow 0.14s var(--wb-ease), color 0.18s var(--wb-ease);
+  }
+  .wb-cta:focus-visible,
+  .wb-viewbtn:focus-visible,
+  .wb-savebtn:focus-visible,
+  .wb-rerun:focus-visible,
+  .wb-navitem:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--wb-app), 0 0 0 4px var(--wb-focus);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .wb-rcard,
+    .wb-source,
+    .wb-bestflag,
+    .wb-savebtn.is-saved svg {
+      animation: none;
+    }
+    .wb-rcard:hover,
+    .wb-saverow:hover {
+      transform: none;
+    }
+    .wb-rcard:hover .wb-rmark {
+      transform: none;
+    }
   }
 }

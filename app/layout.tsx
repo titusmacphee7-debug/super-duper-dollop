@@ -1,5 +1,19 @@
 import type { Metadata } from "next";
+import { Archivo, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
+
+// Self-hosted via next/font. Exposed as the CSS vars globals.css binds to (--wb-sans/--wb-mono).
+const archivo = Archivo({
+  subsets: ["latin"],
+  variable: "--font-sans",
+  display: "swap",
+});
+const plexMono = IBM_Plex_Mono({
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  variable: "--font-mono",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "Workshop Buddy",
@@ -8,8 +22,8 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
-      <body className="min-h-screen bg-wb-bg text-wb-ink">{children}</body>
+    <html lang="en" className={`${archivo.variable} ${plexMono.variable}`}>
+      <body>{children}</body>
     </html>
   );
 }
