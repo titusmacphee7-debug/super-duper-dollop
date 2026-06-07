@@ -18,6 +18,34 @@ no turn-taking; this is continuity, not a handoff.
 
 ---
 
+### 2026-06-07 — verified + hardened the backend, dark theme, pushed to GitHub
+- **Did:** Ran the first real `pnpm install` and brought the gate to green; verified the
+  hand-written `0_init` against `schema.prisma` offline (zero drift). Fixed a dual-ioredis
+  typecheck break (BullMQ pins 5.10.1; added a pnpm override). Did a full code review and fixed:
+  unauthenticated **SSRF** on the scrape path (new `lib/modules/pricing/ssrf.ts`), a money-parse
+  bug (`$1,299` → `$1.30`), a **prod auth-bypass** via `DEV_USER_EMAIL`, `$0`-price listings winning
+  "cheapest", cache-poisoning on blocked pages, fragile adapters (one bad card dropped a whole
+  retailer), and a duplicate-listing race (added `@@unique([itemId, retailer])` + migration + upsert).
+  Applied the **dark theme** (near-black + DeWalt yellow `#FFB81C`). Re-initialized git with the full
+  6-commit history preserved and **pushed to GitHub `super-duper-dollop`**. Linear WOR-106..117 → Done.
+- **Files touched:** `lib/core/{money,auth}.ts`, `lib/modules/pricing/{ssrf,scraper,fetcher,matcher,
+  search}.ts` + `adapters/*`, `lib/modules/wishlist/service.ts`, `prisma/schema.prisma` + new
+  migration `20260607000000_retailerlisting_unique_item_retailer`, `test/core/money.test.ts`,
+  `app/globals.css`, `package.json`, `.gitattributes`.
+- **Verified:** `pnpm typecheck` + `build` + `test` (19 passing) all green; migration offline-verified.
+  CAVEAT: no local Postgres/Redis in this env (no Docker), so runtime paths (DB writes, live scraping,
+  the SSRF DNS resolution) were not exercised against real services — only type/compile/unit-tested.
+- **Contract changes:** design tokens → **dark theme**; schema **additive** `@@unique([itemId, retailer])`
+  on `RetailerListing` (new migration). Service interfaces + API route signatures **unchanged**.
+- **Open / risky:** UI not built — using an external **Claude-design file** (incoming, owner-provided);
+  do not hand-author pages. Live DB/Redis still unprovisioned. The dark-theme hex values may be
+  superseded by the design file.
+- **Next task:** wire the incoming Claude-design wishlist UI to the `/api/wishlist` + `/api/items`
+  contract (compare view two-phase load, retailer cards, price-change badges); provision Postgres +
+  Redis and run `prisma migrate deploy` to exercise it end-to-end.
+
+---
+
 ### 2026-06-07 — backend foundation authored
 - **Did:** bootstrapped the app — Next.js 14 + TS, full Prisma schema (all domains) + first
   migration, core libs (db, redis/cache, events, money, auth, errors, http), the Pricing Engine
