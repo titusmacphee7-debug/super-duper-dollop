@@ -18,6 +18,35 @@ no turn-taking; this is continuity, not a handoff.
 
 ---
 
+### 2026-06-07 — Shop Wishlist UI (Graphite Pro) built + wired
+- **Did:** Implemented the Claude-design **"Graphite Pro"** Shop Wishlist screen inside the app
+  (the design handoff `Workshop buddy.zip`) and wired it to the real contract — no sample data
+  shipped. Reconciled the accent from DeWalt yellow → the design's calm **green `#46B98A`**.
+  Two-phase compare flow (scrape → refresh) with loading skeletons, best-deal = cheapest in-stock,
+  miss cards from `errors[]`, and a saved-wishlist rail with price-change badges. Verified the
+  populated screen renders correctly (dev-server screenshot) before reverting the temporary seed.
+- **Files touched:** `app/globals.css` (Graphite Pro tokens + ported `.wb-*` component CSS),
+  `app/layout.tsx` (next/font: Archivo + IBM Plex Mono), `app/page.tsx` (now the wishlist screen),
+  `tailwind.config.ts` (token map), `components/wishlist/*` (`icons`, `view-model`, `cards`,
+  `CompareScreen`), `CONVENTIONS.md` §7 + `AGENTS.md` design rule (synced to green), `.claude/launch.json`.
+- **Verified:** `pnpm typecheck` + `build` + `test` (19) green; rendered the screen on the dev server
+  and screenshot-checked the populated state (best-deal border/flag, out-of-stock can't win,
+  confidence pips, price-delta badges, miss card) at 1480px.
+- **Contract changes:** design tokens → **Graphite Pro green** (renamed `--wb-accent*` + new
+  `--wb-app/chrome/surface/raised/hover` + `--wb-ink` scale + `--wb-green/red`). Schema, service
+  interfaces, and API signatures **unchanged**. `app/page.tsx` is now Feature 1 (the wishlist).
+- **Open / risky:** still **no live DB/Redis** here, so the screen shows empty/error states until
+  Postgres+Redis are provisioned (compare, save, and the wishlist panel all need the DB). Un-save
+  (delete) is visual-only for now — TODO: wire `removeEntry`. Per-retailer "streaming" is simulated
+  (skeletons during the single-shot refresh; true SSE is a future enhancement). Layout is desktop-first
+  (fixed 1440px frame) — responsive breakpoints are a follow-up. Other nav items (Projects/Inventory/…)
+  are present but disabled (modules not built).
+- **Next task:** provision Postgres + Redis (`docker compose up -d` or a cloud pair), run
+  `pnpm prisma migrate deploy`, and exercise the compare + save flow end-to-end. Then: responsive
+  breakpoints, wire un-save, and real product imagery.
+
+---
+
 ### 2026-06-07 — verified + hardened the backend, dark theme, pushed to GitHub
 - **Did:** Ran the first real `pnpm install` and brought the gate to green; verified the
   hand-written `0_init` against `schema.prisma` offline (zero drift). Fixed a dual-ioredis
