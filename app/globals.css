@@ -4,32 +4,34 @@
 
 /*
  * Workshop Buddy design tokens — the contract for all UI.
- * Brand: DeWalt-style yellow accent on a warm, Claude-like cream canvas with charcoal ink.
+ * Brand: DeWalt yellow accent on a warm near-black canvas with off-white ink (dark theme).
  * Yellow is an ACCENT only (CTAs, active nav, key highlights, focus rings) — never a
  * page background, never a large fill, and NEVER white/light text on yellow.
  */
 :root {
-  /* Brand — yellow is an ACCENT, never a page background */
-  --wb-yellow: #febd17; /* CTAs, active nav, key highlights, brand mark, focus rings */
-  --wb-yellow-hover: #e9a904;
-  --wb-yellow-ink: #2a2206; /* dark text that goes ON yellow */
+  color-scheme: dark;
 
-  /* Surfaces — warm cream, in the Claude family */
-  --wb-bg: #f4f1e9; /* page canvas */
-  --wb-surface: #fcfbf7; /* cards */
-  --wb-surface-2: #efebe0; /* sunken / secondary */
+  /* Brand — DeWalt yellow, an ACCENT, never a page background */
+  --wb-yellow: #ffb81c; /* CTAs, active nav, key highlights, brand mark, focus rings */
+  --wb-yellow-hover: #ffc94d; /* hover state of yellow CTAs */
+  --wb-yellow-ink: #231b07; /* dark text that goes ON yellow */
 
-  /* Ink */
-  --wb-ink: #1c1a16; /* primary text */
-  --wb-muted: #6b665c; /* secondary text */
-  --wb-faint: #9a9488; /* hints */
-  --wb-border: #e5dfd2;
+  /* Surfaces — warm near-black; elevation rises lighter */
+  --wb-bg: #141310; /* page canvas */
+  --wb-surface: #1f1d18; /* cards (raised) */
+  --wb-surface-2: #2a2720; /* secondary / hover panels (raised more) */
 
-  /* Semantic */
-  --wb-success: #1b6b4a;
-  --wb-success-bg: #e8f0e9; /* price drops, in-stock */
-  --wb-danger: #b23b2e;
-  --wb-danger-bg: #f6e8e5; /* price rises, errors */
+  /* Ink — warm off-white on near-black */
+  --wb-ink: #f3f0e7; /* primary text */
+  --wb-muted: #ada690; /* secondary text */
+  --wb-faint: #7e776a; /* hints */
+  --wb-border: #312d24;
+
+  /* Semantic — tuned for dark backgrounds */
+  --wb-success: #5bc68c;
+  --wb-success-bg: #16271e; /* price drops, in-stock */
+  --wb-danger: #f0796a;
+  --wb-danger-bg: #2c1816; /* price rises, errors */
 }
 
 @layer base {
